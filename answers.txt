@@ -1,1 +1,53 @@
-## Place your answers here.
+
+Exercise 2
+====================================================
+2a will overflow reqpath[2048]
+2b will overflow pn, to rewrite funcion pointer
+
+Exercise 3
+====================================================
+We exploit the first vulnerablity in bugs.txt:
+zookd.c:70
+
+2048 is the buffer size of reqpath
+GCC put reqpath at ebp - 0x810 (2048 + 16)
+We also need overwrite ebp (4)
+And then we can overwrite the return address with what we want
+
+So the stack is like this:
+
+|return addr | (ebp - 0x810)
+|------------|
+| AAAAAAA    | <- ebp
+|------------|
+| AAAAAAAA   | (2048 + 16 + 4 - length of injectcode)
+|------------|        
+| injectcode |
+|------------| <- (ebp - 0x810) 
+Bucause we put over shellcode on the stack 
+So the return address should be ebp - 0x810
+
+
+Also, 0x10 is \n, and SYS_unlink is 10, so we have to move 9 to %eax and inc it by 1
+
+Exercise 4
+=======================================================
+All bugs in bugs.txt can be exploited in the same manners. We can take the control flow.
+
+We use call to libc, which put args on the stack and call SYS_unlink (0x40102450)
+
+SYS_unlink is dynamic_lib and has the same address.
+
+Because call instruction will put return address on the stack. So we need to put a useless
+return addr on stack( We don't need it return). After set arg0 (10) and arg1(address of strings) and return to Un_link we can exploit it.
+
+2a and 2b will exploit them in the similar way.
+
+Exercise 5
+=======================================================
+We find that in the http.c, serve dir and serve file can cause arbitary execution
+Attackers and go any file location to get all info he wants.
+
+Exercise 6
+=======================================================
+Just checking all length of buffer size can fix all bugs.
