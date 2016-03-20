@@ -1,17 +1,46 @@
+# Memebers:
+# No. 115037910081 Yuming Wu
+# No. Yang Zheng# Memebers:
+# No. 115037910081 Yuming Wu(吴宇明)
+# No. 5120379052 Yang Zheng(郑阳)
 #
 # [file:#lines]
-# desc
+# description 
 #
 
-[zookd.c:1612]
-description goes here. for example, the 'buf' variable can be
-overwritten by the 'msg' variable because ...
+[zookd.c:70]
+    if ((errmsg = http_request_line(fd, reqpath, env, &env_len)))
 
-    <paste offending line(s) of code here>
+	buffer of reqpath is 2048, we can send a long URI to attack it
 
-[http.c:1512]
-another description.
 
-    <paste offending line(s) of code here>
+[http.c:129]
+	if (http_read_line(fd, buf, sizeof(buf)) < 0)
 
-# many more come here
+	buffer of buf is 8192, but it must store all headers. 
+	So we can exploit by sending a long header.
+
+
+[http.c:159]
+	url_decode(value, sp);
+	
+	because the buffer of value is 512, so we can attack it by sending a long header.
+
+
+[http.c:165]
+	sprintf(envvar, "HTTP_%s", buf);
+
+	The size of envvar is 512, so we can add a long string start with HTTP_ in 
+	header, and springf will write it to buffer envvar. Stack of function 
+	"const char *http_request_headers(int fd)" will be smashed.
+
+
+[zookfs.c:47]
+	http_serve(sockfd, getenv("REQUEST_URI"));
+[http.c:282]
+	Function: http_serve:    strcat(pn, name);
+	
+	Buffer of pn is 1024, but name can be passed via getenv("REQUEST_URI");
+	So, we can send a long request URI, and in http.c, this concatenation
+	will smash the stack of http_serve
+
