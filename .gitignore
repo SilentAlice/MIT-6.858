@@ -13,3 +13,6 @@
 /zooksvc
 /run-shellcode
 /submit.key
+tags
+filenametags
+cscope.out
