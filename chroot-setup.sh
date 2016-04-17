@@ -57,6 +57,8 @@ mkdir -p /jail/usr/share/zoneinfo
 cp -r /usr/share/zoneinfo/America /jail/usr/share/zoneinfo/
 
 create_socket_dir /jail/echosvc 61010:61010 755
+create_socket_dir /jail/authsvc 61015:61015 755
+create_socket_dir /jail/banksvc 61016:61016 755
 
 mkdir -p /jail/tmp
 chmod a+rwxt /jail/tmp
@@ -68,15 +70,18 @@ cp -r zoobar /jail/
 rm -rf /jail/zoobar/db
 
 python /jail/zoobar/zoodb.py init-person
+python /jail/zoobar/zoodb.py init-cred
+python /jail/zoobar/zoodb.py init-bank
 python /jail/zoobar/zoodb.py init-transfer
 
-set_perms 61012:61012 660 /jail/zoobar/db/person/\*
 set_perms 61012:61012 770 /jail/zoobar/db/person
-set_perms 61012:61012 660 /jail/zoobar/db/transfer/\*
-set_perms 61012:61012 770 /jail/zoobar/db/transfer
+set_perms 61015:61015 700 /jail/zoobar/db/cred
+set_perms 61016:61016 700 /jail/zoobar/db/bank
+set_perms 61016:61016 700 /jail/zoobar/db/transfer
 
-#set_perms 61013:61013 660 /jail/zoobar/index.html
-#set_perms 61013:61013 660 /jail/zoobar/favicon.ico
-#set_perms 61013:61013 660 /jail/zoobar/media/\*
+set_perms 61012:61012 660 /jail/zoobar/db/person/\*
+set_perms 61015:61015 600 /jail/zoobar/db/cred/\*
+set_perms 61016:61016 600 /jail/zoobar/db/bank/\*
+set_perms 61016:61016 600 /jail/zoobar/db/transfer/\*
 
 set_perms 61014:61014 555 /jail/zoobar/index.cgi

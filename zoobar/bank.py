@@ -2,21 +2,25 @@ from zoodb import *
 from debug import *
 
 import time
+import auth_client
 
-def transfer(sender, recipient, zoobars):
-    persondb = person_setup()
-    senderp = persondb.query(Person).get(sender)
-    recipientp = persondb.query(Person).get(recipient)
+def transfer(sender, token, recipient, zoobars):
+    if not auth_client.check_token(sender, token):
+        return False
 
-    sender_balance = senderp.zoobars - zoobars
-    recipient_balance = recipientp.zoobars + zoobars
+    bank_db = bank_setup()
+    sender_account = bank_db.query(Account).get(sender)
+    recipient_account = bank_db.query(Account).get(recipient)
+
+    sender_balance = sender_account.zoobars - zoobars
+    recipient_balance = recipient_account.zoobars + zoobars
 
     if sender_balance < 0 or recipient_balance < 0:
-        raise ValueError()
+        return False
 
-    senderp.zoobars = sender_balance
-    recipientp.zoobars = recipient_balance
-    persondb.commit()
+    sender_account.zoobars = sender_balance
+    recipient_account.zoobars = recipient_balance
+    bank_db.commit()
 
     transfer = Transfer()
     transfer.sender = sender
@@ -27,14 +31,22 @@ def transfer(sender, recipient, zoobars):
     transferdb = transfer_setup()
     transferdb.add(transfer)
     transferdb.commit()
+    return True
 
 def balance(username):
-    db = person_setup()
-    person = db.query(Person).get(username)
-    return person.zoobars
+    db = bank_setup()
+    account = db.query(Account).get(username)
+    return account.zoobars
 
 def get_log(username):
     db = transfer_setup()
-    return db.query(Transfer).filter(or_(Transfer.sender==username,
+    xfers = db.query(Transfer).filter(or_(Transfer.sender==username,
                                          Transfer.recipient==username))
+    return [dict(sender=x.sender, recipient=x.recipient, amount=x.amount, time=x.time) for x in xfers]
 
+def new_account(username):
+    account = Account()
+    account.username = username
+    db = bank_setup()
+    db.add(account)
+    db.commit()

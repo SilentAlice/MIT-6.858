@@ -4,7 +4,7 @@ from login import requirelogin
 from zoodb import *
 from debug import *
 from profile import *
-import bank
+import bank_client
 
 @catch_err
 @requirelogin
@@ -15,7 +15,6 @@ def users():
         persondb = person_setup()
         user = persondb.query(Person).get(request.values['user'])
         if user:
-            transferdb = transfer_setup()
             p = user.profile
             if p.startswith("#!python"):
                 p = run_profile(user)
@@ -24,8 +23,8 @@ def users():
             args['profile'] = p_markup
 
             args['user'] = user
-            args['user_zoobars'] = bank.balance(user.username)
-            args['transfers'] = bank.get_log(user.username)
+            args['user_zoobars'] = bank_client.balance(user.username)
+            args['transfers'] = bank_client.get_log(user.username)
         else:
             args['warning'] = "Cannot find that user."
     return render_template('users.html', **args)
