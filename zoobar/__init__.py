@@ -14,7 +14,7 @@ from debug import catch_err
 app = Flask(__name__)
 
 app.add_url_rule("/", "index", index.index, methods=['GET', 'POST'])
-app.add_url_rule("/users", "users", users.users)
+app.add_url_rule("/users", "users", users.users, methods=['GET', 'POST'])
 app.add_url_rule("/transfer", "transfer", transfer.transfer, methods=['GET', 'POST'])
 app.add_url_rule("/zoobarjs", "zoobarjs", zoobarjs.zoobarjs, methods=['GET'])
 app.add_url_rule("/login", "login", login.login, methods=['GET', 'POST'])

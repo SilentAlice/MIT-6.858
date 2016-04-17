@@ -7,7 +7,9 @@ from debug import *
 CredBase = declarative_base()
 AccountBase = declarative_base()
 PersonBase = declarative_base()
+ProfileBase = declarative_base()
 TransferBase = declarative_base()
+MessageBase = declarative_base()
 
 class Cred(CredBase):
     __tablename__ = "cred"
@@ -24,6 +26,10 @@ class Account(AccountBase):
 class Person(PersonBase):
     __tablename__ = "person"
     username = Column(String(128), primary_key=True)
+
+class Profile(ProfileBase):
+    __tablename__ = "profile"
+    username = Column(String(128), primary_key=True)
     profile = Column(String(5000), nullable=False, default="")
 
 class Transfer(TransferBase):
@@ -32,6 +38,14 @@ class Transfer(TransferBase):
     sender = Column(String(128))
     recipient = Column(String(128))
     amount = Column(Integer)
+    time = Column(String)
+
+class Message(MessageBase):
+    __tablename__ = "message"
+    id = Column(Integer, primary_key=True)
+    sender = Column(String(128))
+    to = Column(String(128))
+    text = Column(String)
     time = Column(String)
 
 class TransferJSON:
@@ -63,13 +77,19 @@ def bank_setup():
 def person_setup():
     return dbsetup("person", PersonBase)
 
+def profile_setup():
+    return dbsetup("profile", ProfileBase)
+
 def transfer_setup():
     return dbsetup("transfer", TransferBase)
+
+def message_setup():
+    return dbsetup("message", MessageBase)
 
 import sys
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print "Usage: %s [init-cred|init-person|init-transfer]" % sys.argv[0]
+        print "Usage: %s [init-cred|init-person|init-transfer|init-profile|init-message]" % sys.argv[0]
         exit(1)
 
     cmd = sys.argv[1]
@@ -79,7 +99,11 @@ if __name__ == "__main__":
         bank_setup()
     elif cmd == 'init-person':
         person_setup()
+    elif cmd == 'init-profile':
+        profile_setup()
     elif cmd == 'init-transfer':
         transfer_setup()
+    elif cmd == 'init-message':
+        message_setup()
     else:
         raise Exception("unknown command %s" % cmd)

@@ -6,6 +6,7 @@ import random
 import pbkdf2
 import binascii
 import bank_client
+import modify_profile_client
 
 def newtoken(db, cred):
     hashinput = "%s%.10f" % (cred.password, random.random())
@@ -48,6 +49,7 @@ def register(username, password):
     person_db.add(newperson)
     person_db.commit()
 
+    modify_profile_client.add_user(username)
     bank_client.new_account(username)
 
     return newtoken(db, newcred)

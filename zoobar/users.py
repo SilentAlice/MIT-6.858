@@ -5,6 +5,9 @@ from zoodb import *
 from debug import *
 from profile import *
 import bank_client
+import modify_profile_client
+import message_client
+import cgi
 
 @catch_err
 @requirelogin
@@ -15,7 +18,14 @@ def users():
         persondb = person_setup()
         user = persondb.query(Person).get(request.values['user'])
         if user:
-            p = user.profile
+            if 'message' in request.form:
+                sender = g.user.person.username
+                token = g.user.token
+                to = user.username
+                message = cgi.escape(request.form['message'])
+                message_client.send_message(sender, token, to, message)
+
+            p = modify_profile_client.get_profile(user.username)
             if p.startswith("#!python"):
                 p = run_profile(user)
 
@@ -27,4 +37,5 @@ def users():
             args['transfers'] = bank_client.get_log(user.username)
         else:
             args['warning'] = "Cannot find that user."
+
     return render_template('users.html', **args)
